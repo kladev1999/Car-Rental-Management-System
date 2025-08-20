@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Rental Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-lg: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--dark);
+            color: white;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1::before {
+            content: "🚗";
+            font-size: 32px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            min-height: 32px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 24px 32px;
+            background: var(--light);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .stat-info {
+            font-size: 14px;
+            color: var(--secondary);
+            margin-top: 4px;
+        }
+
+        .content {
+            padding: 32px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .required::after {
+            content: "*";
+            color: var(--danger);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            min-height: 44px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group input.error,
+        .form-group select.error {
+            border-color: var(--danger);
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .filters {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 12px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: var(--dark);
+            color: white;
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        th:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        th.sortable::after {
+            content: " ↕";
+            opacity: 0.5;
+            font-size: 12px;
+        }
+
+        th.sorted-asc::after {
+            content: " ↑";
+            opacity: 1;
+        }
+
+        th.sorted-desc::after {
+            content: " ↓";
+            opacity: 1;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr {
+            transition: background 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--light);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-deposit { background: #dbeafe; color: #1e40af; }
+        .status-paid { background: #d1fae5; color: #065f46; }
+        .status-booked { background: #e0e7ff; color: #3730a3; }
+        .status-picked { background: #fed7aa; color: #9a3412; }
+        .status-returned { background: #d1fae5; color: #065f46; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--secondary);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--dark);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            animation: slideInRight 0.3s ease;
+        }
+
+        .toast.show {
+            display: flex;
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.warning { background: var(--warning); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .content {
+                padding: 16px;
+            }
+
+            .stats-grid {
+                padding: 16px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .table-container {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        .info-text {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-text::before {
+            content: "ℹ️";
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Car Rental Management System</h1>
+            <div class="nav-buttons">
+                <button class="btn btn-primary" onclick="showSection('dashboard')">
+                    📊 Dashboard
+                </button>
+                <button class="btn btn-primary" onclick="showSection('create')">
+                    ➕ New Rental
+                </button>
+                <button class="btn btn-primary" onclick="showSection('list')">
+                    📋 All Rentals
+                </button>
+                <button class="btn btn-success" onclick="exportData('json')">
+                    💾 Export JSON
+                </button>
+                <button class="btn btn-success" onclick="exportData('csv')">
+                    📄 Export CSV
+                </button>
+            </div>
+        </header>
+
+        <!-- Statistics Dashboard -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Rentals</div>
+                <div class="stat-value" id="totalRentals">0</div>
+                <div class="stat-info">All time records</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Today's Pickups</div>
+                <div class="stat-value" id="todayPickups">0</div>
+                <div class="stat-info">Scheduled for today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Rentals</div>
+                <div class="stat-value" id="activeRentals">0</div>
+                <div class="stat-info">Currently rented</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value" id="totalRevenue">$0</div>
+                <div class="stat-info">Estimated earnings</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <div class="info-text">
+                    Welcome to the Car Rental Management System. Use the navigation buttons above to manage rentals.
+                </div>
+                
+                <h2 style="margin-bottom: 20px; font-size: 24px; color: var(--dark);">Quick Overview</h2>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Recent Activity</th>
+                                <th>Customer</th>
+                                <th>Car Model</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentActivity">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 40px; color: var(--secondary);">
+                                    No recent activity
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Create Rental Section -->
+            <section id="create" class="section">
+                <h2 style="margin-bottom: 24px; font-size: 24px;">Create New Rental</h2>
+                
+                <form id="rentalForm" onsubmit="handleSubmit(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="required">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" required minlength="3" maxlength="100">
+                            <span class="error-message">Please enter customer's full name (3-100 characters)</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="required">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required pattern="0[0-9]{8,9}" maxlength="10">
+                            <span class="error-message">Phone must start with 0 and be 9-10 digits</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="email" name="email">
+                            <span class="error-message">Please enter a valid email address</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="required">License Number</label>
+                            <input type="text" id="licenseNo" name="licenseNo" required minlength="5" maxlength="20">
+                            <span class="error-message">License number is required (5-20 characters)</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="required">Car Model</label>
+                            <select id="carModel" name="carModel" required onchange="updatePrice()">
+                                <option value="">Select a model...</option>
+                                <option value="Eco" data-price="25">Economy - $25/day</option>
+                                <option value="Sedan" data-price="35">Sedan - $35/day</option>
+                                <option value="SUV" data-price="50">SUV - $50/day</option>
+                                <option value="Van" data-price="65">Van - $65/day</option>
+                            </select>
+                            <span class="error-message">Please select a car model</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>License Plate</label>
+                            <input type="text" id="plate" name="plate" maxlength="20">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="required">Pickup Date</label>
+                            <input type="date" id="startDate" name="startDate" required onchange="calculateDays()">
+                            <span class="error-message">Please select pickup date</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="required">Return Date</label>
+                            <input type="date" id="endDate" name="endDate" required onchange="calculateDays()">
+                            <span class="error-message">Return date must be after pickup date</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Price per Day</label>
+                            <input type="number" id="pricePerDay" name="pricePerDay" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Rental Days</label>
+                            <input type="number" id="days" name="days" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Total Amount</label>
+                            <input type="text" id="total" name="total" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="required">Payment Status</label>
+                            <select id="paymentStatus" name="paymentStatus" required>
+                                <option value="Pending">Pending</option>
+                                <option value="Deposit">Deposit Paid</option>
+                                <option value="Paid">Fully Paid</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="required">Contract Status</label>
+                            <select id="contractStatus" name="contractStatus" required>
+                                <option value="Booked">Booked</option>
+                                <option value="Picked">Car Picked Up</option>
+                                <option value="Returned">Car Returned</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Notes</label>
+                            <textarea id="note" name="note" rows="3" maxlength="500"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            🔄 Reset
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            💾 Save Rental
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- List Section -->
+            <section id="list" class="section">
+                <h2 style="margin-bottom: 24px; font-size: 24px;">All Rentals</h2>
+                
+                <div class="filters">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Search by name, phone, email, or plate..." onkeyup="filterTable()">
+                    </div>
+                    
+                    <select id="filterModel" onchange="filterTable()">
+                        <option value="">All Models</option>
+                        <option value="Eco">Economy</option>
+                        <option value="Sedan">Sedan</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Van">Van</option>
+                    </select>
+                    
+                    <select id="filterStatus" onchange="filterTable()">
+                        <option value="">All Statuses</option>
+                        <option value="Booked">Booked</option>
+                        <option value="Picked">Picked Up</option>
+                        <option value="Returned">Returned</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                
+                <div class="table-container">
+                    <table id="rentalTable">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable(0)">ID</th>
+                                <th class="sortable" onclick="sortTable(1)">Customer</th>
+                                <th class="sortable" onclick="sortTable(2)">Phone</th>
+                                <th class="sortable" onclick="sortTable(3)">Car Model</th>
+                                <th class="sortable" onclick="sortTable(4)">Pickup Date</th>
+                                <th class="sortable" onclick="sortTable(5)">Return Date</th>
+                                <th class="sortable" onclick="sortTable(6)">Total</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rentalTableBody">
+                            <!-- Rentals will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <div class="empty-state-icon">📋</div>
+                    <div class="empty-state-title">No Rentals Found</div>
+                    <div class="empty-state-text">Start by creating your first rental.</div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Rental</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <!-- Form fields will be dynamically loaded here -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // Data storage
+        let rentals = JSON.parse(localStorage.getItem('rentals')) || [];
+        let currentEditId = null;
+        let sortColumn = -1;
+        let sortDirection = 'asc';
+
+        // Car models and prices
+        const carPrices = {
+            'Eco': 25,
+            'Sedan': 35,
+            'SUV': 50,
+            'Van': 65
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').min = today;
+            document.getElementById('endDate').min = today;
+            
+            // Load data
+            loadRentals();
+            updateStatistics();
+            showSection('dashboard');
+        });
+
+        // Navigation
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionName).classList.add('active');
+            
+            if (sectionName === 'list') {
+                loadRentals();
+            } else if (sectionName === 'dashboard') {
+                updateDashboard();
+            }
+        }
+
+        // Form handling
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            if (!validateForm()) {
+                showToast('Please fill in all required fields correctly', 'error');
+                return;
+            }
+            
+            const formData = new FormData(event.target);
+            const rental = {
+                id: Date.now(),
+                fullName: formData.get('fullName'),
+                phone: formData.get('phone'),
+                email: formData.get('email') || '',
+                licenseNo: formData.get('licenseNo'),
+                carModel: formData.get('carModel'),
+                plate: formData.get('plate') || '',
+                startDate: formData.get('startDate'),
+                endDate: formData.get('endDate'),
+                days: parseInt(formData.get('days')),
+                pricePerDay: parseFloat(formData.get('pricePerDay')),
+                total: parseFloat(formData.get('total').replace('$', '')),
+                paymentStatus: formData.get('paymentStatus'),
+                contractStatus: formData.get('contractStatus'),
+                note: formData.get('note') || '',
+                createdAt: new Date().toISOString()
+            };
+            
+            rentals.push(rental);
+            saveToLocalStorage();
+            
+            showToast('Rental created successfully!', 'success');
+            resetForm();
+            updateStatistics();
+        }
+
+        // Validation
+        function validateForm() {
+            let isValid = true;
+            const form = document.getElementById('rentalForm');
+            const inputs = form.querySelectorAll('input[required], select[required]');
+            
+            inputs.forEach(input => {
+                const errorMsg = input.parentElement.querySelector('.error-message');
+                
+                if (!input.value) {
+                    input.classList.add('error');
+                    if (errorMsg) errorMsg.classList.add('show');
+                    isValid = false;
+                } else {
+                    input.classList.remove('error');
+                    if (errorMsg) errorMsg.classList.remove('show');
+                }
+            });
+            
+            // Validate phone
+            const phone = document.getElementById('phone');
+            if (phone.value && !phone.value.match(/^0[0-9]{8,9}$/)) {
+                phone.classList.add('error');
+                phone.parentElement.querySelector('.error-message').classList.add('show');
+                isValid = false;
+            }
+            
+            // Validate email if provided
+            const email = document.getElementById('email');
+            if (email.value && !email.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                email.classList.add('error');
+                email.parentElement.querySelector('.error-message').classList.add('show');
+                isValid = false;
+            }
+            
+            // Validate dates
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            if (endDate < startDate) {
+                document.getElementById('endDate').classList.add('error');
+                document.getElementById('endDate').parentElement.querySelector('.error-message').classList.add('show');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        // Price and calculation functions
+        function updatePrice() {
+            const carModel = document.getElementById('carModel').value;
+            const priceInput = document.getElementById('pricePerDay');
+            
+            if (carModel && carPrices[carModel]) {
+                priceInput.value = carPrices[carModel];
+                calculateDays();
+            } else {
+                priceInput.value = '';
+            }
+        }
+
+        function calculateDays() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const pricePerDay = parseFloat(document.getElementById('pricePerDay').value);
+            
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const diffTime = Math.abs(end - start);
+                const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
+                
+                document.getElementById('days').value = diffDays;
+                
+                if (pricePerDay) {
+                    const total = diffDays * pricePerDay;
+                    document.getElementById('total').value = `${total.toFixed(2)}`;
+                }
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('rentalForm').reset();
+            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+            document.querySelectorAll('.error-message.show').forEach(el => el.classList.remove('show'));
+        }
+
+        // Load and display rentals
+        function loadRentals() {
+            const tbody = document.getElementById('rentalTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (rentals.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tbody.innerHTML = rentals.map(rental => `
+                <tr>
+                    <td>#${rental.id}</td>
+                    <td>${rental.fullName}</td>
+                    <td>${rental.phone}</td>
+                    <td>${rental.carModel}</td>
+                    <td>${formatDate(rental.startDate)}</td>
+                    <td>${formatDate(rental.endDate)}</td>
+                    <td>${rental.total.toFixed(2)}</td>
+                    <td><span class="status-badge status-${rental.paymentStatus.toLowerCase()}">${rental.paymentStatus}</span></td>
+                    <td><span class="status-badge status-${rental.contractStatus.toLowerCase()}">${rental.contractStatus}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-small btn-warning" onclick="editRental(${rental.id})">✏️</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteRental(${rental.id})">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Edit rental
+        function editRental(id) {
+            const rental = rentals.find(r => r.id === id);
+            if (!rental) return;
+            
+            currentEditId = id;
+            const modal = document.getElementById('editModal');
+            const form = document.getElementById('editForm');
+            
+            // Create edit form HTML
+            form.innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="required">Full Name</label>
+                        <input type="text" id="edit_fullName" value="${rental.fullName}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">Phone Number</label>
+                        <input type="tel" id="edit_phone" value="${rental.phone}" required pattern="0[0-9]{8,9}">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="edit_email" value="${rental.email}">
+                    </div>
+                    <div class="form-group">
+                        <label class="required">License Number</label>
+                        <input type="text" id="edit_licenseNo" value="${rental.licenseNo}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">Car Model</label>
+                        <select id="edit_carModel" required onchange="updateEditPrice()">
+                            <option value="Eco" ${rental.carModel === 'Eco' ? 'selected' : ''}>Economy - $25/day</option>
+                            <option value="Sedan" ${rental.carModel === 'Sedan' ? 'selected' : ''}>Sedan - $35/day</option>
+                            <option value="SUV" ${rental.carModel === 'SUV' ? 'selected' : ''}>SUV - $50/day</option>
+                            <option value="Van" ${rental.carModel === 'Van' ? 'selected' : ''}>Van - $65/day</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>License Plate</label>
+                        <input type="text" id="edit_plate" value="${rental.plate}">
+                    </div>
+                    <div class="form-group">
+                        <label class="required">Pickup Date</label>
+                        <input type="date" id="edit_startDate" value="${rental.startDate}" required onchange="calculateEditDays()">
+                    </div>
+                    <div class="form-group">
+                        <label class="required">Return Date</label>
+                        <input type="date" id="edit_endDate" value="${rental.endDate}" required onchange="calculateEditDays()">
+                    </div>
+                    <div class="form-group">
+                        <label>Price per Day</label>
+                        <input type="number" id="edit_pricePerDay" value="${rental.pricePerDay}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Rental Days</label>
+                        <input type="number" id="edit_days" value="${rental.days}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Total Amount</label>
+                        <input type="text" id="edit_total" value="${rental.total.toFixed(2)}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">Payment Status</label>
+                        <select id="edit_paymentStatus" required>
+                            <option value="Pending" ${rental.paymentStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Deposit" ${rental.paymentStatus === 'Deposit' ? 'selected' : ''}>Deposit Paid</option>
+                            <option value="Paid" ${rental.paymentStatus === 'Paid' ? 'selected' : ''}>Fully Paid</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">Contract Status</label>
+                        <select id="edit_contractStatus" required>
+                            <option value="Booked" ${rental.contractStatus === 'Booked' ? 'selected' : ''}>Booked</option>
+                            <option value="Picked" ${rental.contractStatus === 'Picked' ? 'selected' : ''}>Car Picked Up</option>
+                            <option value="Returned" ${rental.contractStatus === 'Returned' ? 'selected' : ''}>Car Returned</option>
+                            <option value="Cancelled" ${rental.contractStatus === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Notes</label>
+                        <textarea id="edit_note" rows="3">${rental.note}</textarea>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('show');
+        }
+
+        function updateEditPrice() {
+            const carModel = document.getElementById('edit_carModel').value;
+            const priceInput = document.getElementById('edit_pricePerDay');
+            
+            if (carModel && carPrices[carModel]) {
+                priceInput.value = carPrices[carModel];
+                calculateEditDays();
+            }
+        }
+
+        function calculateEditDays() {
+            const startDate = document.getElementById('edit_startDate').value;
+            const endDate = document.getElementById('edit_endDate').value;
+            const pricePerDay = parseFloat(document.getElementById('edit_pricePerDay').value);
+            
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const diffTime = Math.abs(end - start);
+                const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
+                
+                document.getElementById('edit_days').value = diffDays;
+                
+                if (pricePerDay) {
+                    const total = diffDays * pricePerDay;
+                    document.getElementById('edit_total').value = `${total.toFixed(2)}`;
+                }
+            }
+        }
+
+        function saveEdit() {
+            const rental = rentals.find(r => r.id === currentEditId);
+            if (!rental) return;
+            
+            // Update rental data
+            rental.fullName = document.getElementById('edit_fullName').value;
+            rental.phone = document.getElementById('edit_phone').value;
+            rental.email = document.getElementById('edit_email').value;
+            rental.licenseNo = document.getElementById('edit_licenseNo').value;
+            rental.carModel = document.getElementById('edit_carModel').value;
+            rental.plate = document.getElementById('edit_plate').value;
+            rental.startDate = document.getElementById('edit_startDate').value;
+            rental.endDate = document.getElementById('edit_endDate').value;
+            rental.days = parseInt(document.getElementById('edit_days').value);
+            rental.pricePerDay = parseFloat(document.getElementById('edit_pricePerDay').value);
+            rental.total = parseFloat(document.getElementById('edit_total').value.replace(', '));
+            rental.paymentStatus = document.getElementById('edit_paymentStatus').value;
+            rental.contractStatus = document.getElementById('edit_contractStatus').value;
+            rental.note = document.getElementById('edit_note').value;
+            rental.updatedAt = new Date().toISOString();
+            
+            saveToLocalStorage();
+            loadRentals();
+            closeModal();
+            updateStatistics();
+            showToast('Rental updated successfully!', 'success');
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('show');
+            currentEditId = null;
+        }
+
+        // Delete rental
+        function deleteRental(id) {
+            if (confirm('Are you sure you want to delete this rental? This action cannot be undone.')) {
+                rentals = rentals.filter(r => r.id !== id);
+                saveToLocalStorage();
+                loadRentals();
+                updateStatistics();
+                showToast('Rental deleted successfully!', 'success');
+            }
+        }
+
+        // Filter and search
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filterModel = document.getElementById('filterModel').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+            
+            let filtered = rentals;
+            
+            if (searchTerm) {
+                filtered = filtered.filter(rental => 
+                    rental.fullName.toLowerCase().includes(searchTerm) ||
+                    rental.phone.includes(searchTerm) ||
+                    rental.email.toLowerCase().includes(searchTerm) ||
+                    rental.plate.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (filterModel) {
+                filtered = filtered.filter(rental => rental.carModel === filterModel);
+            }
+            
+            if (filterStatus) {
+                filtered = filtered.filter(rental => rental.contractStatus === filterStatus);
+            }
+            
+            displayFilteredRentals(filtered);
+        }
+
+        function displayFilteredRentals(filtered) {
+            const tbody = document.getElementById('rentalTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tbody.innerHTML = filtered.map(rental => `
+                <tr>
+                    <td>#${rental.id}</td>
+                    <td>${rental.fullName}</td>
+                    <td>${rental.phone}</td>
+                    <td>${rental.carModel}</td>
+                    <td>${formatDate(rental.startDate)}</td>
+                    <td>${formatDate(rental.endDate)}</td>
+                    <td>${rental.total.toFixed(2)}</td>
+                    <td><span class="status-badge status-${rental.paymentStatus.toLowerCase()}">${rental.paymentStatus}</span></td>
+                    <td><span class="status-badge status-${rental.contractStatus.toLowerCase()}">${rental.contractStatus}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-small btn-warning" onclick="editRental(${rental.id})">✏️</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteRental(${rental.id})">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Sort table
+        function sortTable(column) {
+            const headers = document.querySelectorAll('th.sortable');
+            headers.forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
+            
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            
+            headers[column].classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+            
+            rentals.sort((a, b) => {
+                let valA, valB;
+                
+                switch(column) {
+                    case 0: valA = a.id; valB = b.id; break;
+                    case 1: valA = a.fullName; valB = b.fullName; break;
+                    case 2: valA = a.phone; valB = b.phone; break;
+                    case 3: valA = a.carModel; valB = b.carModel; break;
+                    case 4: valA = new Date(a.startDate); valB = new Date(b.startDate); break;
+                    case 5: valA = new Date(a.endDate); valB = new Date(b.endDate); break;
+                    case 6: valA = a.total; valB = b.total; break;
+                }
+                
+                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            loadRentals();
+        }
+
+        // Statistics
+        function updateStatistics() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Total rentals
+            document.getElementById('totalRentals').textContent = rentals.length;
+            
+            // Today's pickups
+            const todayPickups = rentals.filter(r => 
+                r.startDate === today && r.contractStatus === 'Booked'
+            ).length;
+            document.getElementById('todayPickups').textContent = todayPickups;
+            
+            // Active rentals
+            const activeRentals = rentals.filter(r => 
+                r.contractStatus === 'Picked'
+            ).length;
+            document.getElementById('activeRentals').textContent = activeRentals;
+            
+            // Total revenue
+            const totalRevenue = rentals.reduce((sum, r) => sum + r.total, 0);
+            document.getElementById('totalRevenue').textContent = `${totalRevenue.toFixed(0)}`;
+        }
+
+        // Dashboard
+        function updateDashboard() {
+            updateStatistics();
+            
+            const tbody = document.getElementById('recentActivity');
+            const recent = rentals.slice(-5).reverse();
+            
+            if (recent.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: var(--secondary);">
+                            No recent activity
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = recent.map(rental => `
+                <tr>
+                    <td>#${rental.id}</td>
+                    <td>${rental.fullName}</td>
+                    <td>${rental.carModel}</td>
+                    <td><span class="status-badge status-${rental.contractStatus.toLowerCase()}">${rental.contractStatus}</span></td>
+                    <td>${formatDate(rental.startDate)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Export functions
+        function exportData(format) {
+            if (rentals.length === 0) {
+                showToast('No data to export', 'warning');
+                return;
+            }
+            
+            if (format === 'json') {
+                const dataStr = JSON.stringify(rentals, null, 2);
+                downloadFile(dataStr, 'rentals.json', 'application/json');
+            } else if (format === 'csv') {
+                const csv = convertToCSV(rentals);
+                downloadFile(csv, 'rentals.csv', 'text/csv');
+            }
+            
+            showToast(`Data exported as ${format.toUpperCase()}`, 'success');
+        }
+
+        function convertToCSV(data) {
+            const headers = Object.keys(data[0]).join(',');
+            const rows = data.map(obj => 
+                Object.values(obj).map(val => 
+                    typeof val === 'string' && val.includes(',') ? `"${val}"` : val
+                ).join(',')
+            );
+            return [headers, ...rows].join('\n');
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Utilities
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('rentals', JSON.stringify(rentals));
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.className = 'toast show ' + type;
+            toastMessage.textContent = message;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Add sample data for testing
+        function addSampleData() {
+            const sampleData = [
+                {
+                    id: Date.now() + 1,
+                    fullName: 'John Smith',
+                    phone: '0812345678',
+                    email: 'john.smith@email.com',
+                    licenseNo: 'DL123456789',
+                    carModel: 'Sedan',
+                    plate: 'ABC-1234',
+                    startDate: '2025-08-20',
+                    endDate: '2025-08-25',
+                    days: 6,
+                    pricePerDay: 35,
+                    total: 210,
+                    paymentStatus: 'Paid',
+                    contractStatus: 'Picked',
+                    note: 'VIP customer',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: Date.now() + 2,
+                    fullName: 'Sarah Johnson',
+                    phone: '0898765432',
+                    email: 'sarah.j@email.com',
+                    licenseNo: 'DL987654321',
+                    carModel: 'SUV',
+                    plate: 'XYZ-5678',
+                    startDate: '2025-08-22',
+                    endDate: '2025-08-28',
+                    days: 7,
+                    pricePerDay: 50,
+                    total: 350,
+                    paymentStatus: 'Deposit',
+                    contractStatus: 'Booked',
+                    note: 'Family vacation',
+                    createdAt: new Date().toISOString()
+                }
+            ];
+            
+            rentals.push(...sampleData);
+            saveToLocalStorage();
+            loadRentals();
+            updateStatistics();
+            showToast('Sample data added!', 'success');
+        }
+
+        // Add this function call in console to add sample data: addSampleData()
+    </script>
+</body>
+</html>
